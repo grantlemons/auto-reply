@@ -1,5 +1,6 @@
-import discord
-import json
+from discord import Client
+from discord import NotFound as discNotFound
+from json import load
 from os import getenv
 from asyncio import get_event_loop
 from asyncio import sleep as asnycsleep
@@ -10,7 +11,7 @@ import logging
 logging.basicConfig(filename='discord.log', level=logging.INFO, filemode='w', format='%(asctime)s - %(levelname)s - %(message)s', encoding='utf8')
 
 with open('commands.json') as json_file:
-    guilds = json.load(json_file)
+    guilds = load(json_file)
 
 
 # env variables
@@ -21,7 +22,7 @@ CONTROL_GUILD = getenv('CONTROL_GUILD')
 
 
 # objects
-client = discord.Client()
+client = Client()
 loop = get_event_loop()
 #slash = SlashCommand(client)
 
@@ -38,7 +39,7 @@ async def on_message_delete(message):
                 await grouped_messages['child'].delete()
             if message == grouped_messages['child']:
                 await grouped_messages['parent'].delete()
-        except discord.errors.NotFound:
+        except discNotFound:
             pass
     
 # what to do on a message
