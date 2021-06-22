@@ -1,11 +1,11 @@
 {
-    "Grant\\'s Journal":
+    "Name doesn't matter":
     {
-        "id": 811784227262562324,
+        "server_id": 811784227262562324,
         "prefix": "!",
         "commands":
         {
-            "sabaton": "Thy will be done!",
+            "input": "output",
             "no": "yes",
             "yes": "no"
         }
