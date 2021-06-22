@@ -46,7 +46,7 @@ async def on_message_delete(message):
 async def on_message(message):
     # responding
     for guild in guilds:
-        if guilds[guild]['id'] == message.guild.id:
+        if guilds[guild]['server_id'] == message.guild.id:
             for command in guilds[guild]['commands']:
                 command_output = guilds[guild]['commands'][command]
                 command_prefix = guilds[guild]['prefix']
