@@ -24,7 +24,6 @@ CONTROL_GUILD = getenv('CONTROL_GUILD')
 # objects
 client = Client()
 loop = get_event_loop()
-#slash = SlashCommand(client)
 
 
 # variables
