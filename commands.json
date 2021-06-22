@@ -1,0 +1,13 @@
+{
+    "Grant\\'s Journal":
+    {
+        "id": 811784227262562324,
+        "prefix": "!",
+        "commands":
+        {
+            "sabaton": "Thy will be done!",
+            "no": "yes",
+            "yes": "no"
+        }
+    }
+}
