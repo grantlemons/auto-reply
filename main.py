@@ -1,8 +1,8 @@
 import discord
-#from discord_slash import SlashCommand
 import json
-import os
-import asyncio
+from os import getenv
+from asyncio import get_event_loop
+from asyncio import sleep as asnycsleep
 from dotenv import load_dotenv
 import logging
 
@@ -15,13 +15,14 @@ with open('commands.json') as json_file:
 
 # env variables
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
-OWNER_ID = os.getenv('BOT_OWNER')
+TOKEN = getenv('DISCORD_TOKEN')
+OWNER_ID = getenv('BOT_OWNER')
+CONTROL_GUILD = getenv('CONTROL_GUILD')
 
 
 # objects
 client = discord.Client()
-loop = asyncio.get_event_loop()
+loop = get_event_loop()
 #slash = SlashCommand(client)
 
 
@@ -52,11 +53,11 @@ async def on_message(message):
                 
                 # shutdown and logging
                 if message.author.id == int(OWNER_ID):
-                    if message.guild.id == 811784227262562324:
+                    if message.guild.id == int(CONTROL_GUILD):
                         if message.content == f'{command_prefix}stop':
                             try:
                                 await message.delete()
-                                await asyncio.sleep(0.2)
+                                await asnycsleep(0.2)
                                 await client.close()
                                 logging.info('Command Triggered Stop')
                                 logging.info('Stopping')
