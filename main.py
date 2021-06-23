@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 import logging
 
 # input / output
-logging.basicConfig(filename='discord.log', level=logging.INFO, filemode='w', format='%(asctime)s - %(levelname)s - %(message)s', encoding='utf8')
+logging.basicConfig(filename='discord.log', level=logging.INFO, filemode='a', format='%(asctime)s - %(levelname)s - %(message)s', encoding='utf8')
+logging.warning('------------------------------------------ Starting ------------------------------------------')
 
 with open('commands.json') as json_file:
     guilds = load(json_file)
@@ -53,11 +54,16 @@ async def on_message(message):
                 command_prefix = guilds[guild]['prefix']
                 for command in guilds[guild]['commands']:
                     command_output = guilds[guild]['commands'][command]
-                    
+                    if message.content == f'{command_prefix}{command}':
+                        print( f'{command}: {command_output}' )
+                        sent_message = await message.reply(f'{command_output}', mention_author=False)
+                        replied_messages.append( {'parent': message, 'child': sent_message} )
+                        logging.info( f'PARENT: {message.id} | {sent_message.id} :CHILD' )
+            
                 # shutdown and logging
                 if message.author.id == int(OWNER_ID):
                     if message.guild.id == int(CONTROL_GUILD):
-                        if message.content == f'{command_prefix}stop':
+                        if message.content == f'{command_prefix}shutdown':
                             try:
                                 await message.delete()
                                 logging.info('Command Triggered Stop')
@@ -66,12 +72,6 @@ async def on_message(message):
                                 await client.close()
                             except:
                                 quit()
-                    
-                    if message.content == f'{command_prefix}{command}':
-                        print( f'{command}: {command_output}' )
-                        sent_message = await message.reply(f'{command_output}', mention_author=False)
-                        replied_messages.append( {'parent': message, 'child': sent_message} )
-                        logging.info( f'PARENT: {message.id} | {sent_message.id} :CHILD' )
                         
         print( f'{message.author}: "{message.content}"' )
         logging.info( f'{message.author}: "{message.content}"' )
