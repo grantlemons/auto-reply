@@ -40,40 +40,41 @@ async def on_message_delete(message):
                 await grouped_messages['parent'].delete()
         except discNotFound:
             pass
+    print( f'{message.author}: "{message.content}" DELETED' )
+    logging.info( f'{message.author}: "{message.content}" DELETED' )
     
 # what to do on a message
 @client.event
 async def on_message(message):
     # responding
-    for guild in guilds:
-        if guilds[guild]['server_id'] == message.guild.id:
-            for command in guilds[guild]['commands']:
-                command_output = guilds[guild]['commands'][command]
+    if message.author != client.user:
+        for guild in guilds:
+            if guilds[guild]['server_id'] == message.guild.id:
                 command_prefix = guilds[guild]['prefix']
-                
+                for command in guilds[guild]['commands']:
+                    command_output = guilds[guild]['commands'][command]
+                    
                 # shutdown and logging
                 if message.author.id == int(OWNER_ID):
                     if message.guild.id == int(CONTROL_GUILD):
                         if message.content == f'{command_prefix}stop':
                             try:
                                 await message.delete()
-                                await asnycsleep(0.2)
-                                await client.close()
                                 logging.info('Command Triggered Stop')
                                 logging.info('Stopping')
+                                await asnycsleep(0.2)
+                                await client.close()
                             except:
-                                try:
-                                    quit()
-                                except:
-                                    pass
-                    else:
-                        print( f'{message.author}: {message.content}' )
-                        logging.info( f'{message.author}: {message.content}' )
-                
-                if message.content == f'{command_prefix}{command}':
-                    print( f'{command}: {command_output}' )
-                    sent_message = await message.reply(f'{command_output}', mention_author=False)
-                    replied_messages.append( {'parent': message, 'child': sent_message} )
+                                quit()
+                    
+                    if message.content == f'{command_prefix}{command}':
+                        print( f'{command}: {command_output}' )
+                        sent_message = await message.reply(f'{command_output}', mention_author=False)
+                        replied_messages.append( {'parent': message, 'child': sent_message} )
+                        logging.info( f'PARENT: {message.id} | {sent_message.id} :CHILD' )
+                        
+        print( f'{message.author}: "{message.content}"' )
+        logging.info( f'{message.author}: "{message.content}"' )
     
 # run it
 try:
@@ -83,11 +84,11 @@ except KeyboardInterrupt:
         loop.run_until_complete(client.close())
     except:
         pass
-    logging.warn('Keyboard triggered stop')
+    logging.warning('Keyboard triggered stop')
     logging.info('Stopping')
 except:
     loop.run_until_complete(client.close())
-    logging.warn('Command line or error triggered stop')
+    logging.warning('Command line or error triggered stop')
     logging.info('Stopping')
 finally:
     loop.close()
