@@ -64,101 +64,103 @@ async def on_message(message):
     # except messages sent by bot
     if message.author != client.user:
         # responding
-        for guild in guilds:
-            if guilds[guild]['server_id'] == message.guild.id:
-                command_prefix = guilds[guild]['prefix']
-                for command in guilds[guild]['commands']:
-                    command_output = guilds[guild]['commands'][command]
-                    if message.content == f'{command_prefix}{command}':
-                        print( f'{command}: {command_output}' )
-                        sent_message = await message.reply(f'{command_output}', mention_author=False)
-                        replied_messages.append( {'parent': message, 'child': sent_message} )
-                        logging.info( f'PARENT: {message.id} | {sent_message.id} :CHILD' )
+        multi_commands = message.content.split(';')
+        for content in multi_commands:
+            content = content.lstrip(' ')
+            for guild in guilds:
+                if guilds[guild]['server_id'] == message.guild.id:
+                    command_prefix = guilds[guild]['prefix']
+                    for command in guilds[guild]['commands']:
+                        command_output = guilds[guild]['commands'][command]
+                        if content == f'{command_prefix}{command}':
+                            print( f'{command}: {command_output}' )
+                            sent_message = await message.reply(f'{command_output}', mention_author=False)
+                            replied_messages.append( {'parent': message, 'child': sent_message} )
+                            logging.info( f'PARENT: {message.id} | {sent_message.id} :CHILD' )
+                
+                    # shutdown and logging
+                    if message.author.id == int(OWNER_ID):
+                        if content == f'!!shutdown':
+                            try:
+                                await message.delete()
+                                logging.info('Command Triggered Stop')
+                                logging.info('Stopping')
+                                await asnycsleep(0.2)
+                                await client.close()
+                            except:
+                                json_out()
+                                quit()
             
-                # shutdown and logging
-                if message.author.id == int(OWNER_ID):
-                    if message.content == f'!!shutdown':
-                        try:
-                            await message.delete()
-                            logging.info('Command Triggered Stop')
-                            logging.info('Stopping')
-                            await asnycsleep(0.2)
-                            await client.close()
-                        except:
-                            json_out()
-                            quit()
-        
-        if message.author.guild_permissions.administrator:
-            # adding responses
-            split = message.content.split(' ')
-            if split[0] == f'!ADD':
-                if len( split ) >= 2:
-                    if len( split ) >= 3:
-                        if split[1] == 'GUILD':
-                            if not message.guild.name in guilds:
-                                guilds[message.guild.name] = {
-                                    'server_id': message.guild.id,
-                                    'prefix': split[2],
-                                    'commands': {}
-                                }
-                                await warn(message, f'Added guild {message.guild.name} to guilds')
-                                await update_commands()
+            if message.author.guild_permissions.administrator:
+                # adding responses
+                split = content.split(' ')
+                if split[0] == f'!ADD':
+                    if len( split ) >= 2:
+                        if len( split ) >= 3:
+                            if split[1] == 'GUILD':
+                                if not message.guild.name in guilds:
+                                    guilds[message.guild.name] = {
+                                        'server_id': message.guild.id,
+                                        'prefix': split[2],
+                                        'commands': {}
+                                    }
+                                    await warn(message, f'Added guild {message.guild.name} to guilds')
+                                    await update_commands()
+                                else:
+                                    await warn(message, f'Guild {message.guild.name} already exist in file')
+                        else:
+                            await warn(message, 'incorrect argument length')
+                        if split[1] == f'COMMAND':
+                            if message.guild.name in guilds:
+                                if len( split ) == 4:
+                                    if not split[2] in guilds[message.guild.name]['commands']:
+                                        guilds[message.guild.name]['commands'][split[2]] = split[3]
+                                        await warn(message, f'Added {split[3]} to commands for {message.guild.name}')
+                                        await update_commands()
+                                else:
+                                    await warn(message, 'incorrect argument length')
                             else:
-                                await warn(message, f'Guild {message.guild.name} already exist in file')
+                                await warn(message, f'Guild {message.guild.name} not in guilds')
                     else:
                         await warn(message, 'incorrect argument length')
-                    if split[1] == f'COMMAND':
-                        if message.guild.name in guilds:
-                            if len( split ) == 4:
-                                if not split[2] in guilds[message.guild.name]['commands']:
-                                    guilds[message.guild.name]['commands'][split[2]] = split[3]
-                                    await warn(message, f'Added {split[3]} to commands for {message.guild.name}')
+
+                # removing responses
+                if split[0] == '!REMOVE':
+                    if len( split ) >= 2:
+                        if len( split ) > 1:
+                            if split[1] == 'GUILD':
+                                if message.guild.name in guilds:
+                                    del guilds[message.guild.name]
+                                    await warn(message, f'Removed guild {message.guild.name} from guilds')
+                                    await update_commands()
+                                else:
+                                    await warn(message, f'Guild {message.guild.name} doesn\'t exist in file')
+                        elif len( split ) < 2:
+                            await warn(message, 'incorrect argument length')
+                        if split[1] == 'COMMAND':
+                            if len( split ) == 3:
+                                if split[2] in guilds[message.guild.name]['commands']:
+                                    del guilds[message.guild.name]['commands'][split[2]]
+                                    await warn(message, f'Removed {split[3]} from commands for {message.guild.name}')
                                     await update_commands()
                             else:
                                 await warn(message, 'incorrect argument length')
-                        else:
-                            await warn(message, f'Guild {message.guild.name} not in guilds')
-                else:
-                    await warn(message, 'incorrect argument length')
-
-            # removing responses
-            if split[0] == '!REMOVE':
-                if len( split ) >= 2:
-                    if len( split ) > 1:
-                        if split[1] == 'GUILD':
-                            if message.guild.name in guilds:
-                                del guilds[message.guild.name]
-                                await warn(message, f'Removed guild {message.guild.name} from guilds')
-                                await update_commands()
-                            else:
-                                await warn(message, f'Guild {message.guild.name} doesn\'t exist in file')
-                    elif len( split ) < 2:
+                    else:
                         await warn(message, 'incorrect argument length')
-                    if split[1] == 'COMMAND':
-                        if len( split ) == 3:
-                            if split[2] in guilds[message.guild.name]['commands']:
-                                del guilds[message.guild.name]['commands'][split[2]]
-                                await warn(message, f'Removed {split[3]} from commands for {message.guild.name}')
-                                await update_commands()
-                        else:
-                            await warn(message, 'incorrect argument length')
-                else:
-                    await warn(message, 'incorrect argument length')
-        
-            #clearing grouped messages from channel
-            if message.content == f'!clear':
-                await message.delete()
-                print( len(replied_messages) )
-                for grouped_messages in replied_messages:
-                    try:
-                        await grouped_messages['parent'].delete()
-                        await grouped_messages['child'].delete()
-                    except discNotFound:
-                        pass
-                    replied_messages.delete(grouped_messages)
+            
+                #clearing grouped messages from channel
+                if content == f'!clear':
+                    await message.delete()
+                    print( len(replied_messages) )
+                    for grouped_messages in replied_messages:
+                        try:
+                            await grouped_messages['parent'].delete()
+                            await grouped_messages['child'].delete()
+                        except discNotFound:
+                            pass
             # logging
-            print( f'{message.author}: "{message.content}"' )
-            logging.info( f'{message.author}: "{message.content}"' )
+            print( f'{message.author}: "{content}"' )
+            logging.info( f'{message.author}: "{content}"' )
     
 # run it
 try:
