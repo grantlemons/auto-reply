@@ -77,6 +77,16 @@ async def on_message(message):
                             sent_message = await message.reply(f'{command_output}', mention_author=False)
                             replied_messages.append( {'parent': message, 'child': sent_message} )
                             logging.info( f'PARENT: {message.id} | {sent_message.id} :CHILD' )
+                    if content == f'{command_prefix}list':
+                        lines = ''
+                        for command in guilds[guild]['commands']:
+                            output = guilds[guild]['commands'][command]
+                            line = f'"{command}" --> "{output}"'
+                            lines = (f'{lines}\n{line}')
+
+                        sent_message = await message.channel.send(lines)
+                        replied_messages.append( {'parent': message, 'child': sent_message} )
+                        logging.info( f'PARENT: {message.id} | {sent_message.id} :CHILD' )
                 
                     # shutdown and logging
                     if message.author.id == int(OWNER_ID):
@@ -94,7 +104,7 @@ async def on_message(message):
             if message.author.guild_permissions.administrator:
                 # adding responses
                 split = content.split(' ')
-                if split[0] == f'!ADD':
+                if split[0] == '!ADD':
                     if len( split ) >= 2:
                         if len( split ) >= 3:
                             if split[1] == 'GUILD':
@@ -149,7 +159,7 @@ async def on_message(message):
                         await warn(message, 'incorrect argument length')
             
                 #clearing grouped messages from channel
-                if content == f'!clear':
+                if content == '!clear':
                     await message.delete()
                     print( len(replied_messages) )
                     for grouped_messages in replied_messages:
