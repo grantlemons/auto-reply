@@ -4,9 +4,7 @@ services:
   reply-bot:
     image: grantlemons/auto-response-bot:latest
     build:
-        context: ./
-        dockerfile: Dockerfile
-    environment:
-        - DISCORD_TOKEN=${DISCORD_TOKEN}
-        - BOT_OWNER=${BOT_OWNER}
-        - CONTROL_GUILD=${CONTROL_GUILD}
+      context: ./
+      dockerfile: Dockerfile
+    env_file: 
+      - .env
