@@ -5,6 +5,7 @@ from json import dump
 from os import getenv
 from asyncio import get_event_loop
 from asyncio import sleep as asnycsleep
+#from dotenv import load_dotenv
 import logging
 
 # input / output
@@ -15,6 +16,7 @@ with open('commands.json') as json_file:
     guilds = load(json_file)
 
 # env variables
+#load_dotenv()
 TOKEN = getenv('DISCORD_TOKEN')
 OWNER_ID = getenv('BOT_OWNER')
 CONTROL_GUILD = getenv('CONTROL_GUILD')
@@ -68,6 +70,9 @@ async def change_settings(content, message):
                             guilds[message.guild.name]['commands'][split[2]] = split[3]
                             await warn(message, f'Added {split[3]} to commands for {message.guild.name}')
                             await update_commands()
+                        else:
+                            output = guilds[message.guild.name]['commands'][split[2]]
+                            await warn(message, f'command already exists with output "{output}"')
                     else:
                         await warn(message, 'incorrect argument length')
                 else:
@@ -157,7 +162,7 @@ async def on_message(message):
                                 quit()
             
             if message.author.guild_permissions.administrator:
-                change_settings(content, message)
+                await change_settings(content, message)
             
                 #clearing grouped messages from channel
                 if content == '!clear':
