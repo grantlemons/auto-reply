@@ -44,6 +44,63 @@ async def warn(message, warn_message):
     logging.info( f'PARENT: {message.id} | {sent_message.id} :CHILD' )
     logging.warning(warn_message)
 
+async def change_settings(content, message):
+    # adding responses
+    split = content.split(' ')
+    if split[0] == '!ADD':
+        if len( split ) >= 2:
+            if len( split ) >= 3:
+                if split[1] == 'GUILD':
+                    if not message.guild.name in guilds:
+                        guilds[message.guild.name] = {
+                            'server_id': message.guild.id,
+                            'prefix': split[2],
+                            'commands': {}
+                        }
+                        await warn(message, f'Added guild {message.guild.name} to guilds')
+                        await update_commands()
+                    else:
+                        await warn(message, f'Guild {message.guild.name} already exist in file')
+            else:
+                await warn(message, 'incorrect argument length')
+            if split[1] == f'COMMAND':
+                if message.guild.name in guilds:
+                    if len( split ) == 4:
+                        if not split[2] in guilds[message.guild.name]['commands']:
+                            guilds[message.guild.name]['commands'][split[2]] = split[3]
+                            await warn(message, f'Added {split[3]} to commands for {message.guild.name}')
+                            await update_commands()
+                    else:
+                        await warn(message, 'incorrect argument length')
+                else:
+                    await warn(message, f'Guild {message.guild.name} not in guilds')
+        else:
+            await warn(message, 'incorrect argument length')
+
+    # removing responses
+    if split[0] == '!REMOVE':
+        if len( split ) >= 2:
+            if len( split ) > 1:
+                if split[1] == 'GUILD':
+                    if message.guild.name in guilds:
+                        del guilds[message.guild.name]
+                        await warn(message, f'Removed guild {message.guild.name} from guilds')
+                        await update_commands()
+                    else:
+                        await warn(message, f'Guild {message.guild.name} doesn\'t exist in file')
+            elif len( split ) < 2:
+                await warn(message, 'incorrect argument length')
+            if split[1] == 'COMMAND':
+                if len( split ) == 3:
+                    if split[2] in guilds[message.guild.name]['commands']:
+                        del guilds[message.guild.name]['commands'][split[2]]
+                        await warn(message, f'Removed {split[3]} from commands for {message.guild.name}')
+                        await update_commands()
+                else:
+                    await warn(message, 'incorrect argument length')
+        else:
+            await warn(message, 'incorrect argument length')
+    
 # parent - child deletion
 @client.event
 async def on_message_delete(message):
@@ -90,7 +147,7 @@ async def on_message(message):
                 
                     # shutdown and logging
                     if message.author.id == int(OWNER_ID):
-                        if content == f'!!shutdown':
+                        if content == f'!shutdown':
                             try:
                                 await message.delete()
                                 logging.info('Command Triggered Stop')
@@ -102,61 +159,7 @@ async def on_message(message):
                                 quit()
             
             if message.author.guild_permissions.administrator:
-                # adding responses
-                split = content.split(' ')
-                if split[0] == '!ADD':
-                    if len( split ) >= 2:
-                        if len( split ) >= 3:
-                            if split[1] == 'GUILD':
-                                if not message.guild.name in guilds:
-                                    guilds[message.guild.name] = {
-                                        'server_id': message.guild.id,
-                                        'prefix': split[2],
-                                        'commands': {}
-                                    }
-                                    await warn(message, f'Added guild {message.guild.name} to guilds')
-                                    await update_commands()
-                                else:
-                                    await warn(message, f'Guild {message.guild.name} already exist in file')
-                        else:
-                            await warn(message, 'incorrect argument length')
-                        if split[1] == f'COMMAND':
-                            if message.guild.name in guilds:
-                                if len( split ) == 4:
-                                    if not split[2] in guilds[message.guild.name]['commands']:
-                                        guilds[message.guild.name]['commands'][split[2]] = split[3]
-                                        await warn(message, f'Added {split[3]} to commands for {message.guild.name}')
-                                        await update_commands()
-                                else:
-                                    await warn(message, 'incorrect argument length')
-                            else:
-                                await warn(message, f'Guild {message.guild.name} not in guilds')
-                    else:
-                        await warn(message, 'incorrect argument length')
-
-                # removing responses
-                if split[0] == '!REMOVE':
-                    if len( split ) >= 2:
-                        if len( split ) > 1:
-                            if split[1] == 'GUILD':
-                                if message.guild.name in guilds:
-                                    del guilds[message.guild.name]
-                                    await warn(message, f'Removed guild {message.guild.name} from guilds')
-                                    await update_commands()
-                                else:
-                                    await warn(message, f'Guild {message.guild.name} doesn\'t exist in file')
-                        elif len( split ) < 2:
-                            await warn(message, 'incorrect argument length')
-                        if split[1] == 'COMMAND':
-                            if len( split ) == 3:
-                                if split[2] in guilds[message.guild.name]['commands']:
-                                    del guilds[message.guild.name]['commands'][split[2]]
-                                    await warn(message, f'Removed {split[3]} from commands for {message.guild.name}')
-                                    await update_commands()
-                            else:
-                                await warn(message, 'incorrect argument length')
-                    else:
-                        await warn(message, 'incorrect argument length')
+                change_settings(content, message)
             
                 #clearing grouped messages from channel
                 if content == '!clear':
