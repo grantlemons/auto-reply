@@ -5,7 +5,6 @@ from json import dump
 from os import getenv
 from asyncio import get_event_loop
 from asyncio import sleep as asnycsleep
-from dotenv import load_dotenv
 import logging
 
 # input / output
@@ -16,7 +15,6 @@ with open('commands.json') as json_file:
     guilds = load(json_file)
 
 # env variables
-load_dotenv()
 TOKEN = getenv('DISCORD_TOKEN')
 OWNER_ID = getenv('BOT_OWNER')
 CONTROL_GUILD = getenv('CONTROL_GUILD')
