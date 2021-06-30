@@ -1,9 +1,10 @@
-dockerfile
+Dockerfile
 LICENSE
 README.md
-discord.log
 ./.gitignore
 ./.gitattributes
 ./.env.example
 ./.dockerignore
-./.git/
+./.git
+./.env
+docker-compose.yml

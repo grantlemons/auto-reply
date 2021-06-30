@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  reply-bot:
+    image: grantlemons/auto-response-bot:latest
+    build:
+        context: ./
+        dockerfile: Dockerfile
+    environment:
+        - DISCORD_TOKEN=${DISCORD_TOKEN}
+        - BOT_OWNER=${BOT_OWNER}
+        - CONTROL_GUILD=${CONTROL_GUILD}
