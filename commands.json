@@ -1,13 +1,1 @@
-{
-    "For your reference":
-    {
-        "server_id": 811784227262562324,
-        "prefix": "!",
-        "commands":
-        {
-            "input": "output",
-            "no": "yes",
-            "yes": "no"
-        }
-    }
-}
+{}
