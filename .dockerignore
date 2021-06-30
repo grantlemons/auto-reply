@@ -1,0 +1,9 @@
+dockerfile
+LICENSE
+README.md
+discord.log
+./.gitignore
+./.gitattributes
+./.env.example
+./.dockerignore
+./.git/
