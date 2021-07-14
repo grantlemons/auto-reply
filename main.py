@@ -8,6 +8,8 @@ from asyncio import sleep as asnycsleep
 #from dotenv import load_dotenv
 import logging
 
+from discord.errors import NotFound
+
 # input / output
 logging.basicConfig(filename='discord.log', level=logging.INFO, filemode='a', format='%(asctime)s - %(levelname)s - %(message)s')
 logging.warning('------------------------------------------ Starting ------------------------------------------')
@@ -68,7 +70,7 @@ async def change_settings(content, message):
                     if len( split ) == 4:
                         if not split[2] in guilds[message.guild.name]['commands']:
                             guilds[message.guild.name]['commands'][split[2]] = split[3]
-                            await warn(message, f'Added {split[3]} to commands for {message.guild.name}')
+                            await warn(message, f'Added {split[2]} to commands for {message.guild.name}')
                             await update_commands()
                         else:
                             output = guilds[message.guild.name]['commands'][split[2]]
@@ -97,7 +99,7 @@ async def change_settings(content, message):
                 if len( split ) == 3:
                     if split[2] in guilds[message.guild.name]['commands']:
                         del guilds[message.guild.name]['commands'][split[2]]
-                        await warn(message, f'Removed {split[3]} from commands for {message.guild.name}')
+                        await warn(message, f'Removed {split[2]} from commands for {message.guild.name}')
                         await update_commands()
                 else:
                     await warn(message, 'incorrect argument length')
@@ -166,7 +168,10 @@ async def on_message(message):
             
                 #clearing grouped messages from channel
                 if content == '!clear':
-                    await message.delete()
+                    try:
+                        await message.delete()
+                    except discNotFound:
+                        pass
                     print( len(replied_messages) )
                     for grouped_messages in replied_messages:
                         try:

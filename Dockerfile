@@ -3,7 +3,7 @@ FROM alpine:latest
 # install python
 RUN apk add py3-pip build-base
 RUN apk add --update --no-cache python3-dev && ln -sf python3 /usr/bin/python
-RUN pip3 install discord.py python-dotenv
+RUN pip3 install discord.py
 
 # configure folder
 RUN adduser -D discord
@@ -18,5 +18,4 @@ RUN chmod 555 /home/discord/
 USER discord
 
 WORKDIR /home/discord/auto-reply/
-#CMD ["python", "/home/discord/auto-reply/main.py"]
 ENTRYPOINT [ "python", "/home/discord/auto-reply/main.py" ]
